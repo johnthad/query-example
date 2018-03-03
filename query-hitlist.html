@@ -1,0 +1,250 @@
+<link rel="import" href="/bower_components/polymer/polymer-element.html">
+<link rel="import" href="/bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="/bower_components/vaadin-grid/vaadin-grid-column.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+<link rel="import" href="/bower_components/vaadin-lumo-styles/spacing.html">
+<link rel="import" href="/bower_components/vaadin-lumo-styles/typography.html">
+
+<dom-module id="query-hitlist" theme-for="vaadin-grid">
+  <template>
+    <custom-style>
+      <style is="custom-style">
+        :host {
+          display: block;
+          width: 654px;
+          margin: 10px auto auto auto;
+        }
+
+        vaadin-grid {
+          background-color: white;
+        }
+
+        [part~="row"] {
+          border-top: 1px dotted rgba(0, 0, 0, 0.15);
+        }
+
+        [part~="cell"] {
+          font-size: var(--lumo-font-size-s, 0.875rem);
+          font-family: 'Roboto', 'Noto', sans-serif;
+          padding: var(--lumo-space-xs, 3px 8px);
+        }
+
+        [part~="header-cell"] {
+          background-color: darkgray;
+          color: white;
+        }
+
+        [part~="footer-cell"] {
+          background-color: darkgray;
+          color: white;
+        }
+
+        .hits {
+          text-align: center;
+          margin: 10px 0;
+        }
+
+        .btnrow {
+          margin: 10px 10px;
+          text-align: center;
+        }
+
+        #pages {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          margin: 20px;
+        }
+
+        #pages>button {
+          user-select: none;
+          padding: 5px;
+          margin: 0 5px;
+          border-radius: 10%;
+          border: 0;
+          background: transparent;
+          font: inherit;
+          outline: none;
+          cursor: pointer;
+        }
+
+        #pages>button:hover,
+        #pages>button:focus {
+          color: #ccc;
+          background-color: #eee;
+        }
+
+        #pages>button[selected] {
+          font-weight: bold;
+          color: white;
+          background-color: #ccc;
+        }
+      </style>
+    </custom-style>
+
+    <vaadin-grid aria-label="Grid Example" id="grid" active-item="{{activeItem}}" page-size="20">
+
+      <vaadin-grid-column width="50px" flex-grow="0">
+        <template class="header">#</template>
+        <template>[[_friendlyIndex(index)]]</template>
+        <template class="footer">#</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column width="200px" flex-grow="0" resizable="true">
+        <template class="header">First Name</template>
+        <template>[[item.firstName]]</template>
+        <template class="footer">First Name</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column width="200px" flex-grow="0" resizable="true">
+        <template class="header">Last Name</template>
+        <template>[[item.lastName]]</template>
+        <template class="footer">Last Name</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column width="200px" flex-grow="0" resizable="true">
+        <template class="header">Phone #</template>
+        <template>[[item.address.phone]]</template>
+        <template class="footer">Phone #</template>
+      </vaadin-grid-column>
+
+    </vaadin-grid>
+
+    <div class="hits"><strong>Total records found:</strong> [[hits]]</div>
+
+    <div id="pages">
+      <button on-click="_prev">&lt;</button>
+      <template is="dom-repeat" items="[[pages]]">
+        <button on-click="_select" selected$="[[_isSelected(page, item)]]">[[item]]</button>
+      </template>
+      <button on-click="_next">&gt;</button>
+    </div>
+
+    <div class="btnrow">
+      <paper-button raised on-tap="_return">Return</paper-button>
+    </div>
+  </template>
+
+  <script>
+    /**
+     * `query-hitlist`
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class QueryHitlist extends Polymer.Element {
+      static get is() { return 'query-hitlist'; }
+
+      static get properties() {
+        return {
+          /**
+           * Selected item.
+           */
+          activeItem: {
+            observer: '_activeItemChanged'
+          },
+          /**
+           * Selected page, aka, set of records.
+           */
+          page: {
+            type: Number,
+            value: 0
+          },
+          /**
+           * Array of page selection values.
+           */
+          pages: {
+            type: Array,
+            value: () => { return []; }
+          },
+          /**
+           * Records return. Held as array of arrays of data.
+           */
+          data: {
+            type: Array,
+            value: () => { return []; }
+          },
+          /**
+           * Total records returned.
+           */
+          hits: {
+            type: Number,
+            value: 0
+          }
+        }
+      }
+
+      _activeItemChanged(item) {
+        this.$.grid.selectedItems = item ? [item] : [];
+      }
+
+      _return(e) {
+        // clear properties and grid
+        this.page = 0;
+        this.pages = [];
+        this.data = [];
+        this.$.grid.items = [];
+        // return to query form
+        this.dispatchEvent(new CustomEvent('return-event'));
+      }
+
+      _friendlyIndex(index) {
+        return index + 1;
+      }
+
+      runQuery(set = 0) {
+        let that = this;
+        let url = 'https://demo.vaadin.com/demo-data/1.0/people?index=' + set + '&count=' + this.$.grid.pageSize;
+        fetch(url)
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (myJson) {
+            let items = myJson.result;
+            if (!that.data.length) {
+              that.$.grid.items = that.data[0] = items;
+              that.pages = [1];
+            } else {
+              that.data[that.data.length] = items;
+              that.pages[that.pages.length] = that.data.length;
+              that.pages = that.pages.slice();
+            }
+            // There is no complete flag in this query, but size
+            // tells the max records.
+            that.hits = that.data.length * that.$.grid.pageSize;
+            if (that.hits < myJson.size) {
+              that.runQuery(that.pages.length * that.$.grid.pageSize);
+            }
+          });
+      }
+
+      _isSelected(page, item) {
+        return page === item - 1;
+      }
+
+      _select(e) {
+        this.page = e.model.item - 1;
+        this._reload();
+      }
+
+      _next() {
+        this.page = Math.min(this.pages.length - 1, this.page + 1);
+        this._reload();
+      }
+
+      _prev() {
+        this.page = Math.max(0, this.page - 1);
+        this._reload();
+      }
+
+      _reload() {
+        if (this.page >= 0) {
+          this.$.grid.items = this.data[this.page];
+        }
+      }
+    }
+
+    window.customElements.define(QueryHitlist.is, QueryHitlist);
+  </script>
+</dom-module>

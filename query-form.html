@@ -1,0 +1,50 @@
+<link rel="import" href="/bower_components/polymer/polymer-element.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+
+<dom-module id="query-form">
+  <template>
+    <style>
+      :host {
+        display: block;
+        margin: 10px auto auto auto;
+      }
+
+      .btnrow {
+        margin: 10px 10px;
+        text-align: center;
+      }
+
+      .form {
+        background: lightgray;
+        width: 550px;
+        height: 400px;
+        margin: 10px auto auto auto;
+        text-align: center;
+      }
+
+      h1 {
+        padding-top: 175px;
+      }
+    </style>
+    <div class="form">
+      <h1>&lt;DUMMY FORM&gt;</h1>
+    </div>
+    <div class="btnrow">
+      <paper-button raised on-tap="_slide">Query</paper-button>
+    </div>
+  </template>
+  <script>
+    class QueryForm extends Polymer.Element {
+      static get is() { return 'query-form'; }
+      static get properties() {
+        return {
+        }
+      }
+
+      _slide(e) {
+        this.dispatchEvent(new CustomEvent('query-event'));
+      }
+    }
+    customElements.define(QueryForm.is, QueryForm);
+  </script>
+</dom-module>

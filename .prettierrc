@@ -1,0 +1,9 @@
+{
+  "printWidth": 100,
+  "parser": "flow",
+  "semi": true,
+  "singleQuote": true,
+  "arrowParens": "always",
+  "bracketSpacing": false,
+  "trailing-comma": "all"
+}

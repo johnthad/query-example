@@ -1,0 +1,67 @@
+<link rel="import" href="/bower_components/polymer/polymer-element.html">
+<link rel="import" href="./query-hitlist.html">
+<link rel="import" href="./query-form.html">
+
+<dom-module id="query-example">
+  <template>
+    <style>
+      :host {
+        display: block;
+        overflow-x: hidden;
+      }
+
+      #qform {
+        transition-duration: 400ms;
+        width: 100%;
+      }
+
+      #hitlist {
+        transition-duration: 400ms;
+      }
+
+      .offright {
+        transform: translate3d(100%, 0, 0);
+        position: absolute;
+        right: -5px;
+      }
+
+      .offleft {
+        transform: translate3d(-100%, 0, 0);
+      }
+    </style>
+    <query-form id="qform"></query-form>
+    <query-hitlist id="hitlist" class="offright"></query-hitlist>
+  </template>
+  <script>
+    class QueryExample extends Polymer.Element {
+      static get is() { return 'query-example'; }
+      static get properties() {
+        return {
+        }
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.$.hitlist.style.marginTop = '-' + this.$.qform.offsetHeight + "px";
+      }
+
+      ready() {
+        super.ready();
+        this.$.qform.addEventListener('query-event', e => this._runQuery());
+        this.$.hitlist.addEventListener('return-event', e => this._showForm());
+      }
+
+      _runQuery() {
+        this.$.qform.classList.add('offleft');
+        this.$.hitlist.classList.remove('offright');
+        this.$.hitlist.runQuery();
+      }
+
+      _showForm() {
+        this.$.hitlist.classList.add('offright');
+        this.$.qform.classList.remove('offleft');
+      }
+    }
+    customElements.define(QueryExample.is, QueryExample);
+  </script>
+</dom-module>
