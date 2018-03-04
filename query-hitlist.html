@@ -11,7 +11,7 @@
       <style is="custom-style">
         :host {
           display: block;
-          width: 654px;
+          width: 600px;
           margin: 10px auto auto auto;
         }
 
@@ -84,12 +84,6 @@
 
     <vaadin-grid aria-label="Grid Example" id="grid" active-item="{{activeItem}}" page-size="20">
 
-      <vaadin-grid-column width="50px" flex-grow="0">
-        <template class="header">#</template>
-        <template>[[_friendlyIndex(index)]]</template>
-        <template class="footer">#</template>
-      </vaadin-grid-column>
-
       <vaadin-grid-column width="200px" flex-grow="0" resizable="true">
         <template class="header">First Name</template>
         <template>[[item.firstName]]</template>
@@ -149,7 +143,8 @@
            */
           page: {
             type: Number,
-            value: 0
+            value: 0,
+            observer: '_loadPage'
           },
           /**
            * Array of page selection values.
@@ -189,10 +184,6 @@
         this.dispatchEvent(new CustomEvent('return-event'));
       }
 
-      _friendlyIndex(index) {
-        return index + 1;
-      }
-
       runQuery(set = 0) {
         let that = this;
         let url = 'https://demo.vaadin.com/demo-data/1.0/people?index=' + set + '&count=' + this.$.grid.pageSize;
@@ -225,20 +216,17 @@
 
       _select(e) {
         this.page = e.model.item - 1;
-        this._reload();
       }
 
       _next() {
         this.page = Math.min(this.pages.length - 1, this.page + 1);
-        this._reload();
       }
 
       _prev() {
         this.page = Math.max(0, this.page - 1);
-        this._reload();
       }
 
-      _reload() {
+      _loadPage() {
         if (this.page >= 0) {
           this.$.grid.items = this.data[this.page];
         }
