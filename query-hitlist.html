@@ -11,7 +11,7 @@
       <style is="custom-style">
         :host {
           display: block;
-          width: 600px;
+          width: 654px;
           margin: 10px auto auto auto;
         }
 
@@ -84,6 +84,12 @@
 
     <vaadin-grid aria-label="Grid Example" id="grid" active-item="{{activeItem}}" page-size="20">
 
+      <vaadin-grid-column width="50px" flex-grow="0">
+        <template class="header">#</template>
+        <template>[[item.index]]</template>
+        <template class="footer">#</template>
+      </vaadin-grid-column>
+
       <vaadin-grid-column width="200px" flex-grow="0" resizable="true">
         <template class="header">First Name</template>
         <template>[[item.firstName]]</template>
@@ -104,7 +110,8 @@
 
     </vaadin-grid>
 
-    <div class="hits"><strong>Total records found:</strong> [[hits]]</div>
+    <div class="hits">
+      <strong>Total records found:</strong> [[hits]]</div>
 
     <div id="pages">
       <button on-click="_prev">&lt;</button>
@@ -193,6 +200,10 @@
           })
           .then(function (myJson) {
             let items = myJson.result;
+            let addIndex = function (el, idx, arr) {
+              el.index = that.data.length * that.$.grid.pageSize + idx + 1;
+            };
+            items.forEach(addIndex);
             if (!that.data.length) {
               that.$.grid.items = that.data[0] = items;
               that.pages = [1];
