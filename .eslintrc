@@ -8,7 +8,7 @@
     "ecmaVersion": 8
   },
   "rules": {
-    "space-before-function-paren": [2, {"named": "always", "anonymous": "always"}],
+    "space-before-function-paren": [2, {"named": "never", "anonymous": "always", "asyncArrow": "always"}],
     "max-len": [2, 100, {
       "ignoreComments": true,
       "ignoreUrls": true,
@@ -33,6 +33,7 @@
     "quotes": [2, "single"],
     "require-jsdoc": 0,
     "valid-jsdoc": 0,
-    "new-cap": ["error", { "capIsNewExceptions": ["Router"] }]
+    "new-cap": ["error", { "capIsNewExceptions": ["Router"] }],
+    "quote-props": ["error", "as-needed"]
   }
 }
